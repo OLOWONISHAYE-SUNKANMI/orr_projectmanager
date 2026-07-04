@@ -22,7 +22,8 @@ import {
   ShieldCheck,
   Bell,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Settings
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -47,6 +48,7 @@ export default function PMSidebar({ openNotifications = () => {} }: SidebarProps
 
   const menuItems = [
     { id: 'dashboard', label: t('pmDashboard.sidebar.dashboard'), icon: LayoutDashboard },
+    { id: 'clients', label: t('pmDashboard.sidebar.assignedClients'), icon: Users },
     { id: 'projects', label: t('pmDashboard.sidebar.assignedProjects'), icon: Folder },
     { id: 'tasks', label: t('pmDashboard.sidebar.taskManagement'), icon: CheckSquare },
     { id: 'approvals', label: t('pmDashboard.sidebar.approvalsQueue'), icon: FileCheck },
@@ -70,11 +72,17 @@ export default function PMSidebar({ openNotifications = () => {} }: SidebarProps
       {/* Brand Header */}
       <div className={`flex items-center pb-8 border-b border-white/5 relative ${isCollapsedView ? 'justify-center' : 'justify-between gap-3'}`}>
         {!isCollapsedView ? (
-          <div className="flex flex-col">
-             <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">ORR PM</span>
-          </div>
+          <img
+            src="https://res.cloudinary.com/depeqzb6z/image/upload/v1764395173/logo_qqpk6j.svg"
+            alt="ORR Logo"
+            className="h-30 w-auto"
+          />
         ) : (
-          <span className="text-xl font-bold text-primary">PM</span>
+          <img
+            src="https://res.cloudinary.com/depeqzb6z/image/upload/v1764395173/logo_qqpk6j.svg"
+            alt="ORR Logo"
+            className="h-8 w-auto"
+          />
         )}
 
         <button
@@ -148,6 +156,19 @@ export default function PMSidebar({ openNotifications = () => {} }: SidebarProps
         </Link>
 
 
+        {/* Settings Shortcut */}
+        <Link
+          href="/settings"
+          onClick={() => setIsOpen(false)}
+          title={isCollapsedView ? t('pmDashboard.settings.title') : undefined}
+          className={`w-full flex items-center ${isCollapsedView ? 'justify-center px-0 py-3' : 'justify-between px-4 py-3'} rounded-xl text-xs font-bold text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 transition border border-transparent cursor-pointer`}
+        >
+          <div className="flex items-center gap-3">
+            <Settings size={isCollapsedView ? 22 : 18} className="text-slate-400" />
+            {!isCollapsedView && <span>{t('pmDashboard.settings.title')}</span>}
+          </div>
+        </Link>
+
         {/* Notifications Shortcut */}
         <button
           onClick={openNotifications}
@@ -189,7 +210,11 @@ export default function PMSidebar({ openNotifications = () => {} }: SidebarProps
       {/* Mobile Top Header Bar */}
       <header className="lg:hidden flex items-center justify-between px-6 py-4 bg-surface border-b border-white/10 w-full z-30 sticky top-0">
         <div className="flex items-center gap-2">
-           <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">ORR PM</span>
+          <img
+            src="https://res.cloudinary.com/depeqzb6z/image/upload/v1764395173/logo_qqpk6j.svg"
+            alt="ORR Logo"
+            className="h-8 w-auto"
+          />
         </div>
         <div className="flex items-center gap-3">
           <button

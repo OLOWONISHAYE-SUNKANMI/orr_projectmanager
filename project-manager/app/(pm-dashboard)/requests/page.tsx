@@ -206,13 +206,29 @@ export default function RequestsPage() {
             <label className="block text-xs font-bold text-slate-400 mb-1">{t('pmDashboard.requests.modal.roleTitle')}</label>
             <input required type="text" className="w-full bg-input-bg border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Senior Backend Developer" />
           </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-400 mb-1">{t('pmDashboard.requests.modal.projectLabel')}</label>
-            <input required type="text" className="w-full bg-input-bg border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Gamma Initialization" />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-400 mb-1">{t('pmDashboard.requests.modal.projectLabel')}</label>
+              <input required type="text" className="w-full bg-input-bg border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Gamma Initialization" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-400 mb-1">{t('pmDashboard.requests.modal.clientNameLabel')}</label>
+              <input required type="text" className="w-full bg-input-bg border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Acme Corp" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-400 mb-1">{t('pmDashboard.requests.modal.specialtyLabel')}</label>
+              <input required type="text" className="w-full bg-input-bg border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Database Architecture" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-400 mb-1">{t('pmDashboard.requests.modal.deadlineLabel')}</label>
+              <input required type="date" className="w-full bg-input-bg border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+            </div>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-400 mb-1">{t('pmDashboard.requests.modal.specialtyLabel')}</label>
-            <input required type="text" className="w-full bg-input-bg border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Database Architecture" />
+            <label className="block text-xs font-bold text-slate-400 mb-1">{t('pmDashboard.requests.modal.notesLabel')}</label>
+            <textarea required className="w-full bg-input-bg border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary min-h-[80px]" placeholder="Specific requirements or context..." />
           </div>
           <div className="flex gap-3 pt-4">
             <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm font-bold transition-colors">

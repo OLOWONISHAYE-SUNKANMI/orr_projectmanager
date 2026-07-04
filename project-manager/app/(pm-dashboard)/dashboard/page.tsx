@@ -21,8 +21,8 @@ export default function PMDashboard() {
   const { t } = useTranslation();
 
   const statCards = [
+    { label: t('pmDashboard.dashboard.assignedClients'), value: "8", icon: Users, color: "text-purple-400", bg: "bg-purple-400/10", link: "/clients" },
     { label: t('pmDashboard.dashboard.activeProjects'), value: "12", icon: Folder, color: "text-blue-400", bg: "bg-blue-400/10", link: "/projects" },
-    { label: t('pmDashboard.dashboard.assignedClients'), value: "8", icon: Users, color: "text-purple-400", bg: "bg-purple-400/10", link: "/projects" },
     { label: t('pmDashboard.dashboard.pendingApprovals'), value: "5", icon: FileCheck, color: "text-amber-400", bg: "bg-amber-400/10", link: "/approvals" },
     { label: t('pmDashboard.dashboard.openRequests'), value: "3", icon: Activity, color: "text-pink-400", bg: "bg-pink-400/10", link: "/requests" },
   ];

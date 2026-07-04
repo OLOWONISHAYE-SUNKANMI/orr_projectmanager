@@ -19,6 +19,7 @@ export default function SignInPage() {
   const is2faPending = usePmStore(state => state.is2faPending);
   const loginError = usePmStore(state => state.loginError);
   const isAuthenticated = usePmStore(state => state.isAuthenticated);
+  const isOnboardingComplete = usePmStore(state => state.isOnboardingComplete);
 
   // Phase 1: Credentials State
   const [email, setEmail] = useState('');
@@ -34,9 +35,13 @@ export default function SignInPage() {
   // Automatic redirect if authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace('/dashboard');
+      if (isOnboardingComplete) {
+        router.replace('/dashboard');
+      } else {
+        router.replace('/onboarding');
+      }
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isOnboardingComplete, router]);
 
   useEffect(() => {
     if (is2faPending && cellRefs.current[0]) {

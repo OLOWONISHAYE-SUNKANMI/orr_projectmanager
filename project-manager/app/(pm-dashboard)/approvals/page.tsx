@@ -1,57 +1,81 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, FileText, CheckCircle, XCircle, Clock, RotateCcw, MessageSquare, Download } from "lucide-react";
+import { Search, Filter, FileText, CheckCircle, XCircle, Clock, RotateCcw, MessageSquare, Download, Calendar, Bell } from "lucide-react";
 import { useTranslation } from "@/lib/i18n/useTranslation";
 import { Modal } from "@/components/ui/Modal";
 import { useToastStore } from "@/store/toastStore";
+import { ApprovalRequest } from "@/types/approvals";
 
 export default function ApprovalsQueue() {
   const [activeTab, setActiveTab] = useState("Pending");
+  const [roleFilter, setRoleFilter] = useState<"All" | "consultant" | "administrator" | "client">("All");
   const [modalType, setModalType] = useState<"approve" | "reject" | null>(null);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   
   const { t } = useTranslation();
   const addToast = useToastStore(state => state.addToast);
 
-  const mockDocs = [
+  const mockDocs: ApprovalRequest[] = [
     {
       id: "DOC-102",
       title: "Q3 Strategy Presentation",
       project: "Alpha Migration",
+      senderRole: "consultant",
       submittedBy: "John Doe",
       submittedAt: "2 hours ago",
+      deadline: "2026-07-05",
       status: "Pending",
       version: "v2.1",
-      comments: 1
+      comments: 1,
+      reminders: [{ id: "r1", message: "Review required by tomorrow EOD", date: "2026-07-04", isRead: false }]
     },
     {
       id: "DOC-103",
       title: "Technical Requirements",
       project: "Beta System",
-      submittedBy: "Jane Smith",
+      senderRole: "administrator",
+      submittedBy: "System Admin",
       submittedAt: "1 day ago",
+      deadline: "2026-07-10",
       status: "Revision Requested",
       version: "v1.0",
-      comments: 3
+      comments: 3,
+      reminders: []
     },
     {
       id: "DOC-104",
       title: "Client Contract",
       project: "Delta Audit",
+      senderRole: "client",
       submittedBy: "Mike Johnson",
       submittedAt: "2 days ago",
+      deadline: "2026-07-15",
       status: "Approved",
       version: "v3.0",
-      comments: 0
+      comments: 0,
+      reminders: []
     }
   ];
 
-  const filteredDocs = activeTab === "All" ? mockDocs : mockDocs.filter(d => 
-    activeTab === "Pending" ? d.status === "Pending" :
-    activeTab === "Needs Revision" ? d.status === "Revision Requested" :
-    activeTab === "Completed" ? (d.status === "Approved" || d.status === "Rejected") : true
+  useEffect(() => {
+    mockDocs.forEach(doc => {
+      doc.reminders.forEach(reminder => {
+        if (!reminder.isRead) {
+          addToast(`${t('pmDashboard.approvals.reminders')}: ${doc.title} - ${reminder.message}`, "info");
+        }
+      });
+    });
+  }, [addToast, t]);
+
+  const filteredDocs = mockDocs.filter(d => 
+    (activeTab === "All" || 
+     (activeTab === "Pending" && d.status === "Pending") ||
+     (activeTab === "Needs Revision" && d.status === "Revision Requested") ||
+     (activeTab === "Completed" && (d.status === "Approved" || d.status === "Rejected"))
+    ) &&
+    (roleFilter === "All" || d.senderRole === roleFilter)
   );
 
   const StatusIcon = ({ status }: { status: string }) => {
@@ -96,6 +120,22 @@ export default function ApprovalsQueue() {
 
         <div className="flex gap-2">
           <div className="relative">
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value as any)}
+              className="block w-40 pl-4 pr-10 py-2 border border-white/10 bg-input-bg rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm appearance-none"
+            >
+              <option value="All">{t('pmDashboard.approvals.allRoles')}</option>
+              <option value="consultant">{t('pmDashboard.approvals.roleConsultant')}</option>
+              <option value="administrator">{t('pmDashboard.approvals.roleAdministrator')}</option>
+              <option value="client">{t('pmDashboard.approvals.roleClient')}</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <Filter className="h-4 w-4 text-slate-400" />
+            </div>
+          </div>
+
+          <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-slate-400" />
             </div>
@@ -105,9 +145,6 @@ export default function ApprovalsQueue() {
               placeholder={t('pmDashboard.approvals.searchPlaceholder')}
             />
           </div>
-          <button className="p-2 bg-white/5 hover:bg-white/10 text-slate-300 rounded-xl border border-white/10 transition-colors">
-            <Filter className="w-5 h-5" />
-          </button>
         </div>
       </div>
 
@@ -139,9 +176,33 @@ export default function ApprovalsQueue() {
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-black uppercase tracking-wider font-mono text-slate-400 mt-2">
                   <span className="text-primary">{doc.project}</span>
                   <span className="opacity-50">•</span>
+                  <span className={`px-2 py-0.5 rounded-full border ${
+                    doc.senderRole === 'consultant' ? 'border-purple-500/30 text-purple-400 bg-purple-500/10' :
+                    doc.senderRole === 'client' ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10' :
+                    'border-blue-500/30 text-blue-400 bg-blue-500/10'
+                  }`}>
+                    {doc.senderRole === 'consultant' ? t('pmDashboard.approvals.roleConsultant') :
+                     doc.senderRole === 'client' ? t('pmDashboard.approvals.roleClient') :
+                     t('pmDashboard.approvals.roleAdministrator')}
+                  </span>
+                  <span className="opacity-50">•</span>
                   <span>{t('pmDashboard.approvals.submittedBy')} <span className="text-slate-300">{doc.submittedBy}</span></span>
                   <span className="opacity-50">•</span>
                   <span>{doc.submittedAt}</span>
+                  <span className="opacity-50">•</span>
+                  <span className="flex items-center gap-1 text-rose-400">
+                    <Calendar className="w-3 h-3" />
+                    {doc.deadline}
+                  </span>
+                  {doc.reminders && doc.reminders.length > 0 && (
+                    <>
+                      <span className="opacity-50">•</span>
+                      <span className="flex items-center gap-1 text-amber-400">
+                        <Bell className="w-3 h-3" />
+                        {doc.reminders.length} {t('pmDashboard.approvals.reminders')}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

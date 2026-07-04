@@ -20,11 +20,11 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { motion } from "framer-motion";
-import { Plus, MoreHorizontal, Calendar, MessageSquare, Paperclip, Flag } from "lucide-react";
+import { Plus, MoreHorizontal, Calendar, MessageSquare, Paperclip, CheckCircle, XCircle } from "lucide-react";
 import { useTranslation } from "@/lib/i18n/useTranslation";
 import { Modal } from "@/components/ui/Modal";
 import { useToastStore } from "@/store/toastStore";
+import { useMeetingStore } from "@/store/meetingStore";
 
 // Mock Data
 const initialColumns = ["Backlog", "To Do", "In Progress", "Review", "Completed"];
@@ -62,7 +62,7 @@ function SortableTaskItem({ task }: { task: any }) {
       style={style}
       {...attributes}
       {...listeners}
-      className="p-4 rounded-2xl bg-card border border-white/5 hover:border-white/20 transition-all cursor-grab active:cursor-grabbing mb-3 group"
+      className="p-4 rounded-2xl bg-card border border-white/5 hover:border-white/20 transition-all cursor-grab active:cursor-grabbing mb-3 group relative z-10"
     >
       <div className="flex justify-between items-start mb-2">
         <span className={`text-[9px] font-mono font-black border px-2 py-0.5 rounded uppercase tracking-wide ${priorityColor}`}>
@@ -97,13 +97,47 @@ function SortableTaskItem({ task }: { task: any }) {
   );
 }
 
+function MeetingRequestCard({ request, onApprove, onReject, t, addToast }: any) {
+  return (
+    <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/30 mb-3 group relative overflow-hidden shrink-0 shadow-lg shadow-purple-500/5 transition-transform hover:-translate-y-1">
+      <div className="absolute top-2 right-2 flex gap-1 z-20">
+        <button onClick={() => { onApprove(request.id); addToast('Meeting Approved', 'success'); }} className="p-1.5 text-green-400 hover:bg-green-400/20 rounded-lg transition-colors tooltip-trigger" title={t('pmDashboard.tasks.approveMeeting')}>
+          <CheckCircle className="w-4 h-4" />
+        </button>
+        <button onClick={() => { onReject(request.id); addToast('Meeting Rejected', 'error'); }} className="p-1.5 text-red-400 hover:bg-red-400/20 rounded-lg transition-colors tooltip-trigger" title={t('pmDashboard.tasks.rejectMeeting')}>
+          <XCircle className="w-4 h-4" />
+        </button>
+      </div>
+      <div className="flex justify-between items-start mb-2 pr-12 relative z-10">
+        <span className="text-[9px] font-mono font-black border px-2 py-0.5 rounded uppercase tracking-wide text-purple-400 bg-purple-400/10 border-purple-500/20">
+          {t('pmDashboard.tasks.meetingRequest')}
+        </span>
+      </div>
+      <h4 className="text-sm font-extrabold text-white mb-1 group-hover:text-purple-300 transition-colors relative z-10">{request.subject}</h4>
+      <p className="text-xs text-purple-300/70 mb-3 font-medium relative z-10">Req by: {request.name}</p>
+      <div className="flex items-center justify-between text-xs text-purple-200/50 relative z-10">
+        <div className="flex items-center gap-1 font-mono">
+          <Calendar className="w-3.5 h-3.5 text-purple-400/70" />
+          <span>{request.date} @ {request.time}</span>
+        </div>
+      </div>
+      <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-purple-500/20 blur-2xl rounded-full z-0 pointer-events-none" />
+    </div>
+  );
+}
+
 export default function KanbanBoard() {
   const [tasks, setTasks] = useState(initialTasks);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isMounted, setIsMounted] = React.useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
   const { t } = useTranslation();
   const addToast = useToastStore(state => state.addToast);
+  
+  const meetingRequests = useMeetingStore(state => state.meetingRequests);
+  const approveRequest = useMeetingStore(state => state.approveRequest);
+  const rejectRequest = useMeetingStore(state => state.rejectRequest);
 
   React.useEffect(() => {
     setIsMounted(true);
@@ -202,7 +236,7 @@ export default function KanbanBoard() {
                        col === 'Review' ? t('pmDashboard.tasks.inReview') : 
                        col === 'Completed' ? t('pmDashboard.tasks.done') : col}
                       <span className="text-[9px] font-mono font-black text-slate-300 bg-slate-800 border border-white/5 px-2 py-0.5 rounded">
-                        {columnTasks.length}
+                        {columnTasks.length + (col === 'Review' ? meetingRequests.length : 0)}
                       </span>
                     </h3>
                     <button className="text-slate-400 hover:text-white transition-colors">
@@ -210,9 +244,23 @@ export default function KanbanBoard() {
                     </button>
                   </div>
                   
-                  <div className="flex-1 p-3 overflow-y-auto custom-scrollbar">
+                  <div className="flex-1 p-3 overflow-y-auto custom-scrollbar flex flex-col">
+                    {col === 'Review' && meetingRequests.length > 0 && (
+                      <div className="mb-2">
+                        {meetingRequests.map(mr => (
+                          <MeetingRequestCard 
+                            key={mr.id} 
+                            request={mr} 
+                            onApprove={approveRequest} 
+                            onReject={rejectRequest} 
+                            t={t} 
+                            addToast={addToast} 
+                          />
+                        ))}
+                      </div>
+                    )}
                     <SortableContext id={col} items={columnTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-                      <div className="min-h-[150px]">
+                      <div className="min-h-[150px] flex-1">
                         {columnTasks.map((task) => (
                           <SortableTaskItem key={task.id} task={task} />
                         ))}
